@@ -1,35 +1,17 @@
-import { StyleSheet, Text, View } from 'react-native';
-
 export default function NotFoundScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>This screen doesn't exist.</Text>
-      <Text style={styles.linkText}>Please navigate back to continue.</Text>
-    </View>
+    <div style={{
+      display: 'flex',
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+      minHeight: '100vh'
+    }}>
+      <div>
+        <h1 style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16 }}>This screen doesn't exist.</h1>
+        <p style={{ color: '#666', textAlign: 'center' }}>Go back to the home screen!</p>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f8fafc',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#1f2937',
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
-    fontSize: 14,
-    color: '#1E40AF',
-    textDecorationLine: 'underline',
-  },
-});

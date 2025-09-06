@@ -1,24 +1,38 @@
-import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, Platform } from 'react-native';
 
 export default function Index() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Client-side redirect after component mounts
+    if (typeof window !== 'undefined') {
+      window.location.href = '/(auth)/login';
+    }
   }, []);
 
-  // Provide fallback during SSR
-  if (!isMounted && Platform.OS === 'web') {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  // TODO: Check authentication status here
-  // For now, redirect to login
-  return <Redirect href="/(auth)/login" />;
+  // Provide fallback during SSR and while redirecting
+  return (
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#f8fafc'
+    }}>
+      <div style={{
+        textAlign: 'center'
+      }}>
+        <div style={{
+          fontSize: '18px',
+          marginBottom: '10px'
+        }}>MCAT Study Tracker</div>
+        <div style={{
+          fontSize: '14px',
+          color: '#64748b'
+        }}>Loading...</div>
+      </div>
+    </div>
+  );
 }

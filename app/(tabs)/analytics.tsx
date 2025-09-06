@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
-const screenWidth = typeof window !== 'undefined' ? Dimensions.get('window').width : 350;
+
 
 interface StudyData {
   date: string;
@@ -43,6 +33,26 @@ export default function Analytics() {
   const [examData, setExamData] = useState<ExamData[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'all'>('month');
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Provide fallback during SSR
+  if (!isMounted) {
+    return (
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8fafc'
+      }}>
+        <div>Loading Analytics...</div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -264,256 +274,193 @@ export default function Analytics() {
     : 0;
 
   return (
-    <ScrollView style={styles.container}>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f8fafc',
+      overflowY: 'auto'
+    }}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Analytics</Text>
-        <Text style={styles.subtitle}>Track your progress and performance</Text>
-      </View>
+      <div style={{
+        padding: '20px',
+        paddingTop: '60px',
+        backgroundColor: 'white',
+        textAlign: 'center'
+      }}>
+        <h1 style={{
+          fontSize: '28px',
+          fontWeight: 'bold',
+          color: '#1E293B',
+          marginBottom: '4px',
+          margin: 0
+        }}>Analytics</h1>
+        <p style={{
+          fontSize: '16px',
+          color: '#64748b',
+          margin: 0
+        }}>Track your progress and performance</p>
+      </div>
 
       {/* Period Selector */}
-      <View style={styles.periodSelector}>
+      <div style={{
+        display: 'flex',
+        padding: '20px',
+        paddingBottom: '10px'
+      }}>
         {(['week', 'month', 'all'] as const).map((period) => (
-          <TouchableOpacity
+          <button
             key={period}
-            style={[
-              styles.periodButton,
-              selectedPeriod === period && styles.selectedPeriodButton,
-            ]}
-            onPress={() => setSelectedPeriod(period)}
+            style={{
+              flex: 1,
+              padding: '12px',
+              margin: '0 4px',
+              borderRadius: '8px',
+              backgroundColor: selectedPeriod === period ? '#1E40AF' : '#F1F5F9',
+              color: selectedPeriod === period ? 'white' : '#64748b',
+              border: 'none',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+            onClick={() => setSelectedPeriod(period)}
           >
-            <Text style={[
-              styles.periodButtonText,
-              selectedPeriod === period && styles.selectedPeriodButtonText,
-            ]}>
-              {period === 'week' ? 'Week' : period === 'month' ? 'Month' : 'All Time'}
-            </Text>
-          </TouchableOpacity>
+            {period === 'week' ? 'Week' : period === 'month' ? 'Month' : 'All Time'}
+          </button>
         ))}
-      </View>
+      </div>
 
       {/* Summary Stats */}
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryCard}>
-          <Ionicons name="time-outline" size={24} color="#1E40AF" />
-          <Text style={styles.summaryNumber}>{Math.round(totalStudyHours * 10) / 10}h</Text>
-          <Text style={styles.summaryLabel}>Total Study Time</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Ionicons name="trending-up" size={24} color="#10B981" />
-          <Text style={styles.summaryNumber}>{averageExamScore || '--'}</Text>
-          <Text style={styles.summaryLabel}>Avg Exam Score</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Ionicons name="document-text" size={24} color="#8B5CF6" />
-          <Text style={styles.summaryNumber}>{examData.length}</Text>
-          <Text style={styles.summaryLabel}>Practice Exams</Text>
-        </View>
-      </View>
+      <div style={{
+        display: 'flex',
+        padding: '20px',
+        paddingTop: '10px'
+      }}>
+        <div style={{
+          flex: 1,
+          backgroundColor: 'white',
+          padding: '16px',
+          borderRadius: '12px',
+          textAlign: 'center',
+          margin: '0 4px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ fontSize: '24px', color: '#1E40AF', marginBottom: '8px' }}>⏰</div>
+          <div style={{
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: '#1E293B',
+            marginTop: '8px'
+          }}>{Math.round(totalStudyHours * 10) / 10}h</div>
+          <div style={{
+            fontSize: '12px',
+            color: '#64748b',
+            marginTop: '4px'
+          }}>Total Study Time</div>
+        </div>
+        <div style={{
+          flex: 1,
+          backgroundColor: 'white',
+          padding: '16px',
+          borderRadius: '12px',
+          textAlign: 'center',
+          margin: '0 4px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ fontSize: '24px', color: '#10B981', marginBottom: '8px' }}>📈</div>
+          <div style={{
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: '#1E293B',
+            marginTop: '8px'
+          }}>{averageExamScore || '--'}</div>
+          <div style={{
+            fontSize: '12px',
+            color: '#64748b',
+            marginTop: '4px'
+          }}>Avg Exam Score</div>
+        </div>
+        <div style={{
+          flex: 1,
+          backgroundColor: 'white',
+          padding: '16px',
+          borderRadius: '12px',
+          textAlign: 'center',
+          margin: '0 4px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ fontSize: '24px', color: '#8B5CF6', marginBottom: '8px' }}>📄</div>
+          <div style={{
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: '#1E293B',
+            marginTop: '8px'
+          }}>{examData.length}</div>
+          <div style={{
+            fontSize: '12px',
+            color: '#64748b',
+            marginTop: '4px'
+          }}>Practice Exams</div>
+        </div>
+      </div>
 
-      {/* Study Hours Chart */}
-      {studyHoursData.labels.length > 0 && (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Daily Study Hours</Text>
-          <LineChart
-            data={studyHoursData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-          />
-        </View>
-      )}
-
-      {/* Subject Distribution */}
-      {subjectData.length > 0 && (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Study Time by Subject</Text>
-          <PieChart
-            data={subjectData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            accessor="hours"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            style={styles.chart}
-          />
-        </View>
-      )}
-
-      {/* Exam Scores Trend */}
-      {examScoresData.labels.length > 0 && (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Exam Score Progression</Text>
-          <LineChart
-            data={examScoresData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={{
-              ...chartConfig,
-              color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
-            }}
-            bezier
-            style={styles.chart}
-          />
-        </View>
-      )}
-
-      {/* Section Performance */}
-      {sectionPerformanceData.datasets[0].data.some(score => score > 0) && (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Average Section Scores</Text>
-          <BarChart
-            data={sectionPerformanceData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={{
-              ...chartConfig,
-              color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
-            }}
-            style={styles.chart}
-            yAxisSuffix=""
-            showValuesOnTopOfBars
-          />
-        </View>
-      )}
+      {/* Charts Placeholder */}
+      <div style={{
+        backgroundColor: 'white',
+        margin: '20px',
+        marginTop: '10px',
+        borderRadius: '16px',
+        padding: '16px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <h3 style={{
+          fontSize: '18px',
+          fontWeight: '600',
+          color: '#1E293B',
+          marginBottom: '16px',
+          textAlign: 'center',
+          margin: '0 0 16px 0'
+        }}>Analytics Dashboard</h3>
+        <div style={{
+          padding: '40px',
+          textAlign: 'center',
+          color: '#64748b'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+          <p style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600' }}>
+            Charts will be available soon
+          </p>
+          <p style={{ margin: 0, fontSize: '14px', lineHeight: '20px' }}>
+            Interactive charts and detailed analytics are coming in a future update
+          </p>
+        </div>
+      </div>
 
       {/* Empty State */}
       {studyData.length === 0 && examData.length === 0 && (
-        <View style={styles.emptyState}>
-          <Ionicons name="analytics-outline" size={64} color="#9CA3AF" />
-          <Text style={styles.emptyText}>No data available</Text>
-          <Text style={styles.emptySubtext}>
+        <div style={{
+          backgroundColor: 'white',
+          margin: '20px',
+          padding: '40px',
+          borderRadius: '16px',
+          textAlign: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ fontSize: '64px', color: '#9CA3AF', marginBottom: '16px' }}>📈</div>
+          <div style={{
+            fontSize: '20px',
+            fontWeight: '600',
+            color: '#64748b',
+            marginTop: '16px'
+          }}>No data available</div>
+          <div style={{
+            fontSize: '14px',
+            color: '#9CA3AF',
+            marginTop: '8px',
+            lineHeight: '20px'
+          }}>
             Start logging study sessions and practice exams to see your analytics
-          </Text>
-        </View>
+          </div>
+        </div>
       )}
-    </ScrollView>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: 'white',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#64748b',
-  },
-  periodSelector: {
-    flexDirection: 'row',
-    padding: 20,
-    paddingBottom: 10,
-  },
-  periodButton: {
-    flex: 1,
-    padding: 12,
-    marginHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-  },
-  selectedPeriodButton: {
-    backgroundColor: '#1E40AF',
-  },
-  periodButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  selectedPeriodButtonText: {
-    color: 'white',
-  },
-  summaryContainer: {
-    flexDirection: 'row',
-    padding: 20,
-    paddingTop: 10,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  summaryNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginTop: 8,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: '#64748b',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  chartContainer: {
-    backgroundColor: 'white',
-    margin: 20,
-    marginTop: 10,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  chart: {
-    borderRadius: 16,
-  },
-  emptyState: {
-    backgroundColor: 'white',
-    margin: 20,
-    padding: 40,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#64748b',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-});

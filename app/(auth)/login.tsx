@@ -1,15 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
 import { router } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 
@@ -26,11 +15,16 @@ export default function Login() {
   // Provide fallback during SSR
   if (!isMounted) {
     return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </View>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: '#f8fafc',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <div>Loading...</div>
+      </div>
     );
   }
 
@@ -41,7 +35,9 @@ export default function Login() {
     }
 
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      if (typeof window !== 'undefined') {
+        window.alert('Please fill in all fields');
+      }
       return;
     }
 
@@ -53,147 +49,141 @@ export default function Login() {
       });
 
       if (error) {
-        Alert.alert('Login Failed', error.message);
+        if (typeof window !== 'undefined') {
+          window.alert('Login Failed: ' + error.message);
+        }
       } else {
-        router.replace('/(tabs)/dashboard');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/(tabs)/dashboard';
+        }
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      if (typeof window !== 'undefined') {
+        window.alert('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const navigateToSignup = () => {
-    router.push('/(auth)/signup');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/(auth)/signup';
+    }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue your MCAT journey</Text>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: '#f8fafc',
+      justifyContent: 'center',
+      padding: '24px'
+    }}>
+      <div style={{
+        maxWidth: '400px',
+        margin: '0 auto',
+        width: '100%'
+      }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: 'bold',
+          color: '#1E40AF',
+          textAlign: 'center',
+          marginBottom: '8px'
+        }}>Welcome Back</h1>
+        <p style={{
+          fontSize: '16px',
+          color: '#64748b',
+          textAlign: 'center',
+          marginBottom: '32px'
+        }}>Sign in to continue your MCAT journey</p>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#374151',
+            display: 'block',
+            marginBottom: '8px'
+          }}>Email</label>
+          <input
+            type="email"
             value={email}
-            onChangeText={setEmail}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              backgroundColor: 'white'
+            }}
           />
-        </View>
+        </div>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#374151',
+            display: 'block',
+            marginBottom: '8px'
+          }}>Password</label>
+          <input
+            type="password"
             value={password}
-            onChangeText={setPassword}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            secureTextEntry
-            autoCapitalize="none"
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              backgroundColor: 'white'
+            }}
           />
-        </View>
+        </div>
 
-        <TouchableOpacity 
-          style={[styles.loginButton, loading && styles.disabledButton]} 
-          onPress={handleLogin}
+        <button
+          onClick={handleLogin}
           disabled={loading}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: loading ? '#9ca3af' : '#1E40AF',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            marginBottom: '16px'
+          }}
         >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.loginButtonText}>Sign In</Text>
-          )}
-        </TouchableOpacity>
+          {loading ? 'Signing In...' : 'Sign In'}
+        </button>
 
-        <View style={styles.signupContainer}>
-          <Text style={styles.signupText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={navigateToSignup}>
-            <Text style={styles.signupLink}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+        <div style={{ textAlign: 'center' }}>
+          <span style={{ color: '#64748b' }}>Don't have an account? </span>
+          <button
+            onClick={navigateToSignup}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#1E40AF',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Sign Up
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  formContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1E40AF',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#64748b',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  loginButton: {
-    backgroundColor: '#1E40AF',
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  signupText: {
-    fontSize: 14,
-    color: '#64748b',
-  },
-  signupLink: {
-    fontSize: 14,
-    color: '#1E40AF',
-    fontWeight: '600',
-  },
-});

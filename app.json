@@ -39,13 +39,15 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
-      "output": "server"
+      "output": "single"
     },
     "plugins": [
       "expo-router"
     ],
     "extra": {
-      "router": {},
+      "router": {
+        "sitemap": false
+      },
       "eas": {
         "projectId": "0eb3af07-74d2-4c2d-84be-0d0afe1cf748"
       }

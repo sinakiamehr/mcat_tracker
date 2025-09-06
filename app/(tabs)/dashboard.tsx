@@ -1,14 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -55,12 +45,11 @@ export default function Dashboard() {
   // Provide fallback during SSR
   if (!isMounted) {
     return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1E40AF" />
-          <Text style={styles.loadingText}>Loading Dashboard...</Text>
-        </View>
-      </View>
+      <div style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+        <div style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc', display: 'flex', height: '100vh' }}>
+          <div style={{ marginTop: 16, fontSize: 16, color: '#64748b' }}>Loading Dashboard...</div>
+        </div>
+      </div>
     );
   }
 
@@ -70,7 +59,9 @@ export default function Dashboard() {
       await Promise.all([loadStats(), loadRecentActivity()]);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      Alert.alert('Error', 'Failed to load dashboard data');
+      if (typeof window !== 'undefined') {
+        window.alert('Failed to load dashboard data');
+      }
     } finally {
       setLoading(false);
     }
@@ -186,18 +177,11 @@ export default function Dashboard() {
   };
 
   const handleSignOut = async () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          style: 'destructive',
-          onPress: () => signOut()
-        },
-      ]
-    );
+    if (typeof window !== 'undefined') {
+      if (window.confirm('Are you sure you want to sign out?')) {
+        signOut();
+      }
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -214,327 +198,120 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1E40AF" />
-        <Text style={styles.loadingText}>Loading dashboard...</Text>
-      </View>
+      <div style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc', display: 'flex', height: '100vh' }}>
+        <div style={{ marginTop: 16, fontSize: 16, color: '#64748b' }}>Loading dashboard...</div>
+      </div>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <div style={{ flex: 1, backgroundColor: '#f8fafc', overflowY: 'auto' }}>
       {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Welcome back!</Text>
-          <Text style={styles.userName}>{user?.user_metadata?.full_name || 'Student'}</Text>
-        </View>
-        <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#64748b" />
-        </TouchableOpacity>
-      </View>
+      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 60, backgroundColor: 'white' }}>
+        <div>
+          <div style={{ fontSize: 16, color: '#64748b' }}>Welcome back!</div>
+          <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1E293B' }}>{user?.user_metadata?.full_name || 'Student'}</div>
+        </div>
+        <button onClick={handleSignOut} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
+          <span style={{ fontSize: 24, color: '#64748b' }}>⚪</span>
+        </button>
+      </div>
 
       {/* Stats Cards */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Ionicons name="time-outline" size={24} color="#1E40AF" />
-            <Text style={styles.statValue}>{stats.totalStudyHours}h</Text>
-            <Text style={styles.statLabel}>Total Study</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Ionicons name="calendar-outline" size={24} color="#059669" />
-            <Text style={styles.statValue}>{stats.weeklyStudyHours}h</Text>
-            <Text style={styles.statLabel}>This Week</Text>
-          </View>
-        </View>
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Ionicons name="school-outline" size={24} color="#DC2626" />
-            <Text style={styles.statValue}>{stats.practiceExamsCount}</Text>
-            <Text style={styles.statLabel}>Practice Exams</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Ionicons name="trophy-outline" size={24} color="#D97706" />
-            <Text style={styles.statValue}>{stats.averageScore}%</Text>
-            <Text style={styles.statLabel}>Avg Score</Text>
-          </View>
-        </View>
-      </View>
+      <div style={{ padding: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'row', marginBottom: 16 }}>
+          <div style={{ flex: 1, backgroundColor: 'white', padding: 20, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <span style={{ fontSize: 24, color: '#1E40AF' }}>⏰</span>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1E293B', marginTop: 8 }}>{stats.totalStudyHours}h</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Total Study</div>
+          </div>
+          <div style={{ flex: 1, backgroundColor: 'white', padding: 20, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <span style={{ fontSize: 24, color: '#059669' }}>📅</span>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1E293B', marginTop: 8 }}>{stats.weeklyStudyHours}h</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>This Week</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row', marginBottom: 16 }}>
+          <div style={{ flex: 1, backgroundColor: 'white', padding: 20, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <span style={{ fontSize: 24, color: '#DC2626' }}>🎓</span>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1E293B', marginTop: 8 }}>{stats.practiceExamsCount}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Practice Exams</div>
+          </div>
+          <div style={{ flex: 1, backgroundColor: 'white', padding: 20, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <span style={{ fontSize: 24, color: '#D97706' }}>🏆</span>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1E293B', marginTop: 8 }}>{stats.averageScore}%</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Avg Score</div>
+          </div>
+        </div>
+      </div>
 
       {/* Current Streak */}
-      <View style={styles.streakCard}>
-        <View style={styles.streakHeader}>
-          <Ionicons name="flame" size={28} color="#F59E0B" />
-          <Text style={styles.streakTitle}>Current Streak</Text>
-        </View>
-        <Text style={styles.streakValue}>{stats.currentStreak} days</Text>
-        <Text style={styles.streakSubtitle}>Keep it up! Study today to maintain your streak.</Text>
-      </View>
+      <div style={{ backgroundColor: 'white', margin: 20, marginTop: 0, padding: 20, borderRadius: 12, alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontSize: 28, color: '#F59E0B' }}>🔥</span>
+          <div style={{ fontSize: 18, fontWeight: '600', color: '#1E293B', marginLeft: 8 }}>Current Streak</div>
+        </div>
+        <div style={{ fontSize: 32, fontWeight: 'bold', color: '#F59E0B', marginBottom: 4 }}>{stats.currentStreak} days</div>
+        <div style={{ fontSize: 14, color: '#64748b', textAlign: 'center' }}>Keep it up! Study today to maintain your streak.</div>
+      </div>
 
       {/* Quick Actions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/(tabs)/study')}
+      <div style={{ padding: 20, paddingTop: 0 }}>
+        <div style={{ fontSize: 20, fontWeight: 'bold', color: '#1E293B', marginBottom: 16 }}>Quick Actions</div>
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <button 
+            style={{ flex: 1, backgroundColor: '#1E40AF', padding: 16, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
+            onClick={() => router.push('/(tabs)/study')}
           >
-            <Ionicons name="book" size={24} color="white" />
-            <Text style={styles.actionText}>Start Study</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.practiceButton]}
-            onPress={() => router.push('/(tabs)/practice')}
+            <span style={{ fontSize: 24, color: 'white' }}>📚</span>
+            <div style={{ color: 'white', fontSize: 16, fontWeight: '600', marginTop: 8 }}>Start Study</div>
+          </button>
+          <button 
+            style={{ flex: 1, backgroundColor: '#DC2626', padding: 16, borderRadius: 12, alignItems: 'center', marginHorizontal: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
+            onClick={() => router.push('/(tabs)/practice')}
           >
-            <Ionicons name="school" size={24} color="white" />
-            <Text style={styles.actionText}>Practice Exam</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            <span style={{ fontSize: 24, color: 'white' }}>🎓</span>
+            <div style={{ color: 'white', fontSize: 16, fontWeight: '600', marginTop: 8 }}>Practice Exam</div>
+          </button>
+        </div>
+      </div>
 
       {/* Recent Activity */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
+      <div style={{ padding: 20, paddingTop: 0 }}>
+        <div style={{ fontSize: 20, fontWeight: 'bold', color: '#1E293B', marginBottom: 16 }}>Recent Activity</div>
         {recentActivity.length > 0 ? (
-          <View style={styles.activityContainer}>
+          <div style={{ backgroundColor: 'white', borderRadius: 12, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
             {recentActivity.map((activity) => (
-              <View key={activity.id} style={styles.activityItem}>
-                <View style={styles.activityIcon}>
-                  <Ionicons 
-                    name={activity.type === 'study' ? 'book' : 'school'} 
-                    size={20} 
-                    color={activity.type === 'study' ? '#1E40AF' : '#DC2626'} 
-                  />
-                </View>
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>
+              <div key={activity.id} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 16, borderBottom: '1px solid #F1F5F9' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#F8FAFC', justifyContent: 'center', alignItems: 'center', marginRight: 12, display: 'flex' }}>
+                  <span style={{ fontSize: 20, color: activity.type === 'study' ? '#1E40AF' : '#DC2626' }}>
+                    {activity.type === 'study' ? '📚' : '🎓'}
+                  </span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: '600', color: '#1E293B' }}>
                     {activity.type === 'study' ? 'Study Session' : 'Practice Exam'}
-                  </Text>
-                  <Text style={styles.activitySubject}>{activity.subject}</Text>
+                  </div>
+                  <div style={{ fontSize: 14, color: '#64748b', marginTop: 2 }}>{activity.subject}</div>
                   {activity.duration && (
-                    <Text style={styles.activityDetail}>{activity.duration} minutes</Text>
+                    <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{activity.duration} minutes</div>
                   )}
                   {activity.score && (
-                    <Text style={styles.activityDetail}>Score: {activity.score}%</Text>
+                    <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>Score: {activity.score}%</div>
                   )}
-                </View>
-                <Text style={styles.activityDate}>{formatDate(activity.created_at)}</Text>
-              </View>
+                </div>
+                <div style={{ fontSize: 12, color: '#9CA3AF' }}>{formatDate(activity.created_at)}</div>
+              </div>
             ))}
-          </View>
+          </div>
         ) : (
-          <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
-            <Text style={styles.emptyText}>No recent activity</Text>
-            <Text style={styles.emptySubtext}>Start studying to see your progress here</Text>
-          </View>
+          <div style={{ backgroundColor: 'white', padding: 40, borderRadius: 12, alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <span style={{ fontSize: 48, color: '#9CA3AF' }}>📅</span>
+            <div style={{ fontSize: 18, fontWeight: '600', color: '#64748b', marginTop: 16 }}>No recent activity</div>
+            <div style={{ fontSize: 14, color: '#9CA3AF', marginTop: 4, textAlign: 'center' }}>Start studying to see your progress here</div>
+          </div>
         )}
-      </View>
-    </ScrollView>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8fafc',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#64748b',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: 'white',
-  },
-  greeting: {
-    fontSize: 16,
-    color: '#64748b',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1E293B',
-  },
-  signOutButton: {
-    padding: 8,
-  },
-  statsContainer: {
-    padding: 20,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#64748b',
-    marginTop: 4,
-  },
-  streakCard: {
-    backgroundColor: 'white',
-    margin: 20,
-    marginTop: 0,
-    padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  streakHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  streakTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1E293B',
-    marginLeft: 8,
-  },
-  streakValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#F59E0B',
-    marginBottom: 4,
-  },
-  streakSubtitle: {
-    fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-  },
-  section: {
-    padding: 20,
-    paddingTop: 0,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginBottom: 16,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: '#1E40AF',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  practiceButton: {
-    backgroundColor: '#DC2626',
-  },
-  actionText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 8,
-  },
-  activityContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  },
-  activityIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8FAFC',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  activitySubject: {
-    fontSize: 14,
-    color: '#64748b',
-    marginTop: 2,
-  },
-  activityDetail: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
-  activityDate: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-  emptyState: {
-    backgroundColor: 'white',
-    padding: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#64748b',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-});

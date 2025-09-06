@@ -1,5 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+
+// Web-compatible storage
+const createWebStorage = () => {
+  return {
+    getItem: (key: string) => {
+      if (typeof window !== 'undefined') {
+        return window.localStorage.getItem(key);
+      }
+      return null;
+    },
+    setItem: (key: string, value: string) => {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, value);
+      }
+    },
+    removeItem: (key: string) => {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(key);
+      }
+    },
+  };
+};
+
+// Platform-specific storage
+const storage = Platform.OS === 'web' ? createWebStorage() : AsyncStorage;
 
 // TODO: Replace with your actual Supabase URL and anon key
 const supabaseUrl = 'https://napdxuqbvaruwdkpastv.supabase.co';
@@ -7,10 +33,10 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,
+    storage: storage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });
 

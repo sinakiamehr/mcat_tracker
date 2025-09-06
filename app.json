@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "MCAT Study Tracker",
+    "slug": "mcat-study-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "mcat-study-tracker",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E40AF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "icons": {
+        "29": "./assets/ios-icons/icon-29.png",
+        "40": "./assets/ios-icons/icon-40.png",
+        "58": "./assets/ios-icons/icon-58.png",
+        "60": "./assets/ios-icons/icon-60.png",
+        "76": "./assets/ios-icons/icon-76.png",
+        "80": "./assets/ios-icons/icon-80.png",
+        "87": "./assets/ios-icons/icon-87.png",
+        "120": "./assets/ios-icons/icon-120.png",
+        "180": "./assets/ios-icons/icon-180.png"
+      },
+      "bundleIdentifier": "com.anonymous.mcatstudytracker"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1E40AF"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.mcatstudytracker"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}

@@ -41,12 +41,28 @@ export default function Dashboard() {
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     if (typeof window !== 'undefined') {
       loadDashboardData();
+    } else {
+      setLoading(false);
     }
   }, []);
+
+  // Provide fallback during SSR
+  if (!isMounted) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#1E40AF" />
+          <Text style={styles.loadingText}>Loading Dashboard...</Text>
+        </View>
+      </View>
+    );
+  }
 
   const loadDashboardData = async () => {
     try {

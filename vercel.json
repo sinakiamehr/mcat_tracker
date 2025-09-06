@@ -4,11 +4,7 @@
   "devCommand": "npx expo start --web",
   "cleanUrls": true,
   "framework": null,
-  "functions": {
-    "app/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
+
   "rewrites": [
     {
       "source": "/(.*)",

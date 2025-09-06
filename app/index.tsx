@@ -8,7 +8,7 @@ export default function Index() {
     
     // Client-side redirect after component mounts
     if (typeof window !== 'undefined') {
-      window.location.href = '/(auth)/login';
+      window.location.href = '/login';
     }
   }, []);
 

@@ -68,7 +68,7 @@ export default function Login() {
 
   const navigateToSignup = () => {
     if (typeof window !== 'undefined') {
-      window.location.href = '/(auth)/signup';
+      window.location.href = '/signup';
     }
   };
 

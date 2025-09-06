@@ -89,7 +89,7 @@ export default function Signup() {
       } else {
         if (typeof window !== 'undefined') {
           window.alert('Success! Please check your email for verification link before signing in.');
-          window.location.href = '/(auth)/login';
+          window.location.href = '/login';
         }
       }
     } catch (error) {
@@ -103,7 +103,7 @@ export default function Signup() {
 
   const navigateToLogin = () => {
     if (typeof window !== 'undefined') {
-      window.location.href = '/(auth)/login';
+      window.location.href = '/login';
     }
   };
 

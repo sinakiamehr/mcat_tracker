@@ -21,13 +21,17 @@ interface StudyData {
 }
 
 interface ExamData {
-  exam_date: string;
-  total_score: number;
-  biology_score?: number;
-  chemistry_score?: number;
-  physics_score?: number;
-  psychology_score?: number;
-  cars_score?: number;
+  created_at: string;
+  score: number;
+  max_score: number;
+  subject_scores: {
+    biology?: number;
+    chemistry?: number;
+    physics?: number;
+    psychology?: number;
+    cars?: number;
+  };
+  completion_time_minutes?: number;
 }
 
 const SUBJECTS = ['Biology', 'Chemistry', 'Physics', 'Psychology/Sociology', 'CARS'];
@@ -64,23 +68,23 @@ export default function Analytics() {
         .from('study_sessions')
         .select('*')
         .eq('user_id', user?.id)
-        .order('session_date', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (selectedPeriod === 'week') {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        query = query.gte('session_date', weekAgo.toISOString().split('T')[0]);
+        query = query.gte('created_at', weekAgo.toISOString());
       } else if (selectedPeriod === 'month') {
         const monthAgo = new Date();
         monthAgo.setMonth(monthAgo.getMonth() - 1);
-        query = query.gte('session_date', monthAgo.toISOString().split('T')[0]);
+        query = query.gte('created_at', monthAgo.toISOString());
       }
 
       const { data, error } = await query;
       if (error) throw error;
 
       const processedData = (data || []).map(session => ({
-        date: session.session_date,
+        date: session.created_at,
         hours: session.duration_minutes / 60,
         subject: session.subject,
       }));
@@ -97,16 +101,16 @@ export default function Analytics() {
         .from('practice_exams')
         .select('*')
         .eq('user_id', user?.id)
-        .order('exam_date', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (selectedPeriod === 'week') {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        query = query.gte('exam_date', weekAgo.toISOString().split('T')[0]);
+        query = query.gte('created_at', weekAgo.toISOString());
       } else if (selectedPeriod === 'month') {
         const monthAgo = new Date();
         monthAgo.setMonth(monthAgo.getMonth() - 1);
-        query = query.gte('exam_date', monthAgo.toISOString().split('T')[0]);
+        query = query.gte('created_at', monthAgo.toISOString());
       }
 
       const { data, error } = await query;
@@ -159,10 +163,10 @@ export default function Analytics() {
 
   const getExamScoresChartData = () => {
     const scoresWithDates = examData
-      .filter(exam => exam.total_score)
+      .filter(exam => exam.score)
       .map(exam => ({
-        date: new Date(exam.exam_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        score: exam.total_score,
+        date: new Date(exam.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        score: exam.score,
       }))
       .slice(-6); // Show last 6 exams
 
@@ -192,25 +196,27 @@ export default function Analytics() {
     };
 
     examData.forEach(exam => {
-      if (exam.biology_score) {
-        sectionTotals.biology += exam.biology_score;
-        sectionCounts.biology++;
-      }
-      if (exam.chemistry_score) {
-        sectionTotals.chemistry += exam.chemistry_score;
-        sectionCounts.chemistry++;
-      }
-      if (exam.physics_score) {
-        sectionTotals.physics += exam.physics_score;
-        sectionCounts.physics++;
-      }
-      if (exam.psychology_score) {
-        sectionTotals.psychology += exam.psychology_score;
-        sectionCounts.psychology++;
-      }
-      if (exam.cars_score) {
-        sectionTotals.cars += exam.cars_score;
-        sectionCounts.cars++;
+      if (exam.subject_scores) {
+        if (exam.subject_scores.biology) {
+          sectionTotals.biology += exam.subject_scores.biology;
+          sectionCounts.biology++;
+        }
+        if (exam.subject_scores.chemistry) {
+          sectionTotals.chemistry += exam.subject_scores.chemistry;
+          sectionCounts.chemistry++;
+        }
+        if (exam.subject_scores.physics) {
+          sectionTotals.physics += exam.subject_scores.physics;
+          sectionCounts.physics++;
+        }
+        if (exam.subject_scores.psychology) {
+          sectionTotals.psychology += exam.subject_scores.psychology;
+          sectionCounts.psychology++;
+        }
+        if (exam.subject_scores.cars) {
+          sectionTotals.cars += exam.subject_scores.cars;
+          sectionCounts.cars++;
+        }
       }
     });
 

@@ -33,15 +33,17 @@ const EXAM_TYPES = [
 interface PracticeExam {
   id?: string;
   exam_type: string;
-  total_score?: number;
-  biology_score?: number;
-  chemistry_score?: number;
-  physics_score?: number;
-  psychology_score?: number;
-  cars_score?: number;
-  notes?: string;
-  exam_date: string;
-  created_at?: string;
+  score: number;
+  max_score: number;
+  subject_scores?: {
+    biology?: number;
+    chemistry?: number;
+    physics?: number;
+    psychology?: number;
+    cars?: number;
+  };
+  completion_time_minutes?: number;
+  created_at: string;
 }
 
 export default function Exams() {
@@ -52,14 +54,12 @@ export default function Exams() {
   
   // Form state
   const [examType, setExamType] = useState('');
-  const [examDate, setExamDate] = useState(new Date().toISOString().split('T')[0]);
   const [totalScore, setTotalScore] = useState('');
   const [biologyScore, setBiologyScore] = useState('');
   const [chemistryScore, setChemistryScore] = useState('');
   const [physicsScore, setPhysicsScore] = useState('');
   const [psychologyScore, setPsychologyScore] = useState('');
   const [carsScore, setCarsScore] = useState('');
-  const [notes, setNotes] = useState('');
   const [showExamTypeModal, setShowExamTypeModal] = useState(false);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function Exams() {
         .from('practice_exams')
         .select('*')
         .eq('user_id', user?.id)
-        .order('exam_date', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setExamHistory(data || []);
@@ -83,14 +83,12 @@ export default function Exams() {
 
   const resetForm = () => {
     setExamType('');
-    setExamDate(new Date().toISOString().split('T')[0]);
     setTotalScore('');
     setBiologyScore('');
     setChemistryScore('');
     setPhysicsScore('');
     setPsychologyScore('');
     setCarsScore('');
-    setNotes('');
   };
 
   const validateForm = () => {
@@ -98,10 +96,7 @@ export default function Exams() {
       Alert.alert('Error', 'Please select an exam type.');
       return false;
     }
-    if (!examDate) {
-      Alert.alert('Error', 'Please select an exam date.');
-      return false;
-    }
+    // Date validation removed - using automatic created_at timestamp
     if (!totalScore && !biologyScore && !chemistryScore && !physicsScore && !psychologyScore && !carsScore) {
       Alert.alert('Error', 'Please enter at least one score.');
       return false;
@@ -114,16 +109,20 @@ export default function Exams() {
 
     setLoading(true);
     try {
-      const examData: PracticeExam = {
+      const subjectScores = {
+        biology: biologyScore ? parseInt(biologyScore) : null,
+        chemistry: chemistryScore ? parseInt(chemistryScore) : null,
+        physics: physicsScore ? parseInt(physicsScore) : null,
+        psychology: psychologyScore ? parseInt(psychologyScore) : null,
+        cars: carsScore ? parseInt(carsScore) : null,
+      };
+
+      const examData = {
         exam_type: examType,
-        exam_date: examDate,
-        total_score: totalScore ? parseInt(totalScore) : null,
-        biology_score: biologyScore ? parseInt(biologyScore) : null,
-        chemistry_score: chemistryScore ? parseInt(chemistryScore) : null,
-        physics_score: physicsScore ? parseInt(physicsScore) : null,
-        psychology_score: psychologyScore ? parseInt(psychologyScore) : null,
-        cars_score: carsScore ? parseInt(carsScore) : null,
-        notes: notes.trim() || null,
+        score: totalScore ? parseInt(totalScore) : 0,
+        max_score: 528,
+        subject_scores: subjectScores,
+        completion_time_minutes: null,
       };
 
       const { error } = await supabase
@@ -170,18 +169,18 @@ export default function Exams() {
   };
 
   const calculateAverageScore = () => {
-    const scoresWithTotal = examHistory.filter(exam => exam.total_score);
+    const scoresWithTotal = examHistory.filter(exam => exam.score);
     if (scoresWithTotal.length === 0) return null;
-    const sum = scoresWithTotal.reduce((acc, exam) => acc + (exam.total_score || 0), 0);
+    const sum = scoresWithTotal.reduce((acc, exam) => acc + (exam.score || 0), 0);
     return Math.round(sum / scoresWithTotal.length);
   };
 
   const getRecentTrend = () => {
-    const recentExams = examHistory.filter(exam => exam.total_score).slice(0, 3);
+    const recentExams = examHistory.filter(exam => exam.score).slice(0, 3);
     if (recentExams.length < 2) return null;
     
-    const latest = recentExams[0].total_score || 0;
-    const previous = recentExams[1].total_score || 0;
+    const latest = recentExams[0].score || 0;
+    const previous = recentExams[1].score || 0;
     const change = latest - previous;
     
     return {
@@ -254,55 +253,53 @@ export default function Exams() {
               <View key={exam.id} style={styles.examItem}>
                 <View style={styles.examHeader}>
                   <Text style={styles.examType} numberOfLines={2}>{exam.exam_type}</Text>
-                  <Text style={styles.examDate}>{formatDate(exam.exam_date)}</Text>
+                  <Text style={styles.examDate}>{formatDate(exam.created_at)}</Text>
                 </View>
                 
-                {exam.total_score && (
+                {exam.score && (
                   <View style={styles.totalScoreContainer}>
-                    <Text style={[styles.totalScore, { color: getScoreColor(exam.total_score) }]}>
-                      {exam.total_score}/528
+                    <Text style={[styles.totalScore, { color: getScoreColor(exam.score) }]}>
+                      {exam.score}/{exam.max_score || 528}
                     </Text>
                   </View>
                 )}
                 
-                {(exam.biology_score || exam.chemistry_score || exam.physics_score || exam.psychology_score || exam.cars_score) && (
+                {exam.subject_scores && Object.keys(exam.subject_scores).length > 0 && (
                   <View style={styles.sectionScores}>
-                    {exam.biology_score && (
+                    {exam.subject_scores.biology && (
                       <View style={styles.sectionScore}>
                         <Text style={styles.sectionLabel}>Bio</Text>
-                        <Text style={styles.sectionValue}>{exam.biology_score}</Text>
+                        <Text style={styles.sectionValue}>{exam.subject_scores.biology}</Text>
                       </View>
                     )}
-                    {exam.chemistry_score && (
+                    {exam.subject_scores.chemistry && (
                       <View style={styles.sectionScore}>
                         <Text style={styles.sectionLabel}>Chem</Text>
-                        <Text style={styles.sectionValue}>{exam.chemistry_score}</Text>
+                        <Text style={styles.sectionValue}>{exam.subject_scores.chemistry}</Text>
                       </View>
                     )}
-                    {exam.physics_score && (
+                    {exam.subject_scores.physics && (
                       <View style={styles.sectionScore}>
                         <Text style={styles.sectionLabel}>Phys</Text>
-                        <Text style={styles.sectionValue}>{exam.physics_score}</Text>
+                        <Text style={styles.sectionValue}>{exam.subject_scores.physics}</Text>
                       </View>
                     )}
-                    {exam.psychology_score && (
+                    {exam.subject_scores.psychology && (
                       <View style={styles.sectionScore}>
                         <Text style={styles.sectionLabel}>Psyc</Text>
-                        <Text style={styles.sectionValue}>{exam.psychology_score}</Text>
+                        <Text style={styles.sectionValue}>{exam.subject_scores.psychology}</Text>
                       </View>
                     )}
-                    {exam.cars_score && (
+                    {exam.subject_scores.cars && (
                       <View style={styles.sectionScore}>
                         <Text style={styles.sectionLabel}>CARS</Text>
-                        <Text style={styles.sectionValue}>{exam.cars_score}</Text>
+                        <Text style={styles.sectionValue}>{exam.subject_scores.cars}</Text>
                       </View>
                     )}
                   </View>
                 )}
                 
-                {exam.notes && (
-                  <Text style={styles.examNotes} numberOfLines={3}>{exam.notes}</Text>
-                )}
+
               </View>
             ))}
           </View>
@@ -349,16 +346,7 @@ export default function Exams() {
                 </TouchableOpacity>
               </View>
 
-              {/* Exam Date */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Exam Date *</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={examDate}
-                  onChangeText={setExamDate}
-                  placeholder="YYYY-MM-DD"
-                />
-              </View>
+
 
               {/* Total Score */}
               <View style={styles.formGroup}>
@@ -432,18 +420,7 @@ export default function Exams() {
                 />
               </View>
 
-              {/* Notes */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Notes</Text>
-                <TextInput
-                  style={[styles.textInput, styles.notesInput]}
-                  value={notes}
-                  onChangeText={setNotes}
-                  placeholder="Add notes about this exam..."
-                  multiline
-                  textAlignVertical="top"
-                />
-              </View>
+
             </ScrollView>
 
             <View style={styles.modalFooter}>

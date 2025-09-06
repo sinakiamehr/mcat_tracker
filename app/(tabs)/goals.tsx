@@ -90,7 +90,7 @@ export default function Goals() {
             .from('practice_exams')
             .select('id')
             .eq('user_id', user?.id)
-            .gte('exam_date', new Date(goal.created_at).toISOString().split('T')[0]);
+            .gte('created_at', new Date(goal.created_at).toISOString());
           
           currentValue = examData?.length || 0;
           break;
@@ -98,12 +98,12 @@ export default function Goals() {
         case 'target_score':
           const { data: latestExam } = await supabase
             .from('practice_exams')
-            .select('total_score')
+            .select('score')
             .eq('user_id', user?.id)
-            .order('exam_date', { ascending: false })
+            .order('created_at', { ascending: false })
             .limit(1);
           
-          currentValue = latestExam?.[0]?.total_score || 0;
+          currentValue = latestExam?.[0]?.score || 0;
           break;
 
         default:

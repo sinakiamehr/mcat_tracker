@@ -63,10 +63,16 @@ export default function Exams() {
   const [showExamTypeModal, setShowExamTypeModal] = useState(false);
 
   useEffect(() => {
-    loadExamHistory();
+    // Skip data loading during static export
+    if (typeof window !== 'undefined') {
+      loadExamHistory();
+    }
   }, []);
 
   const loadExamHistory = async () => {
+    // Skip during static export
+    if (typeof window === 'undefined') return;
+    
     try {
       const { data, error } = await supabase
         .from('practice_exams')
@@ -106,6 +112,9 @@ export default function Exams() {
 
   const handleSaveExam = async () => {
     if (!validateForm()) return;
+    
+    // Skip during static export
+    if (typeof window === 'undefined') return;
 
     setLoading(true);
     try {

@@ -47,6 +47,11 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
+    // Skip during static export
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     if (!validateForm()) return;
 
     setLoading(true);

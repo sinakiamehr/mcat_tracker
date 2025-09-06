@@ -1,13 +1,18 @@
 {
-  "buildCommand": "npm install --legacy-peer-deps && npx expo export --platform web",
+  "buildCommand": "npx expo export --platform web",
   "outputDirectory": "dist",
   "devCommand": "npx expo start --web",
-  "installCommand": "npm install --legacy-peer-deps",
+  "cleanUrls": true,
   "framework": null,
+  "functions": {
+    "app/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }

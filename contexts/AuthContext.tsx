@@ -34,10 +34,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      // During static export, provide fallback values
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch(() => {
+      // Handle auth errors during static export
       setLoading(false);
     });
 

@@ -12,7 +12,7 @@ import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = typeof window !== 'undefined' ? Dimensions.get('window').width : 350;
 
 interface StudyData {
   date: string;
@@ -45,7 +45,9 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAnalyticsData();
+    if (typeof window !== 'undefined') {
+      loadAnalyticsData();
+    }
   }, [selectedPeriod]);
 
   const loadAnalyticsData = async () => {

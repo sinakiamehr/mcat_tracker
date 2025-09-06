@@ -10,6 +10,11 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
 
+  // During static export, don't redirect or show loading
+  if (typeof window === 'undefined') {
+    return <>{children}</>;
+  }
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>

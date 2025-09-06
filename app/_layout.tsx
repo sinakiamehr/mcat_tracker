@@ -3,9 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
-// Create QueryClient with SSR-safe configuration
-const createQueryClient = () => new QueryClient({
+// Simple QueryClient configuration
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000,
@@ -13,19 +14,6 @@ const createQueryClient = () => new QueryClient({
     },
   },
 });
-
-let queryClient: QueryClient | null = null;
-
-function getQueryClient() {
-  if (typeof window === 'undefined') {
-    // Server: always make a new query client
-    return createQueryClient();
-  } else {
-    // Browser: make a new query client if we don't already have one
-    if (!queryClient) queryClient = createQueryClient();
-    return queryClient;
-  }
-}
 
 export default function RootLayout() {
   const [isMounted, setIsMounted] = useState(false);
@@ -37,21 +25,15 @@ export default function RootLayout() {
   // SSR fallback
   if (!isMounted) {
     return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#f8fafc'
-      }}>
-        <div>Loading...</div>
-      </div>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
     );
   }
   
   return (
     <AuthProvider>
-      <QueryClientProvider client={getQueryClient()}>
+      <QueryClientProvider client={queryClient}>
         <StatusBar style="auto" />
         <Stack>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -66,3 +48,16 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#64748b',
+  },
+});

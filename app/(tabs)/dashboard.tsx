@@ -75,7 +75,7 @@ export default function Dashboard() {
 
     const { data: practiceExams } = await supabase
       .from('practice_exams')
-      .select('score, created_at')
+      .select('total_score, created_at')
       .eq('user_id', user?.id);
 
     // Calculate stats
@@ -92,7 +92,7 @@ export default function Dashboard() {
 
     const practiceExamsCount = practiceExams?.length || 0;
     const averageScore = practiceExams?.length 
-      ? Math.round(practiceExams.reduce((sum, exam) => sum + exam.score, 0) / practiceExams.length)
+      ? Math.round(practiceExams.reduce((sum, exam) => sum + exam.total_score, 0) / practiceExams.length)
       : 0;
 
     // Calculate current streak (consecutive days with study activity)
@@ -117,7 +117,7 @@ export default function Dashboard() {
 
     const { data: practiceExams } = await supabase
       .from('practice_exams')
-      .select('id, test_type, score, created_at')
+      .select('id, exam_type, total_score, created_at')
       .eq('user_id', user?.id)
       .order('created_at', { ascending: false })
       .limit(3);
@@ -138,8 +138,8 @@ export default function Dashboard() {
       activities.push({
         id: exam.id,
         type: 'practice',
-        subject: exam.test_type,
-        score: exam.score,
+        subject: exam.exam_type,
+        score: exam.total_score,
         created_at: exam.created_at,
       });
     });

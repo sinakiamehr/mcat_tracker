@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
 
 export default function Index() {
   const [isMounted, setIsMounted] = useState(false);
@@ -7,32 +9,41 @@ export default function Index() {
     setIsMounted(true);
     
     // Client-side redirect after component mounts
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
+    const timer = setTimeout(() => {
+      router.replace('/login');
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Provide fallback during SSR and while redirecting
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#f8fafc'
-    }}>
-      <div style={{
-        textAlign: 'center'
-      }}>
-        <div style={{
-          fontSize: '18px',
-          marginBottom: '10px'
-        }}>MCAT Study Tracker</div>
-        <div style={{
-          fontSize: '14px',
-          color: '#64748b'
-        }}>Loading...</div>
-      </div>
-    </div>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>MCAT Study Tracker</Text>
+        <Text style={styles.loading}>Loading...</Text>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  content: {
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: '#000',
+  },
+  loading: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+});

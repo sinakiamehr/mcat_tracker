@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 
@@ -15,16 +16,9 @@ export default function Login() {
   // Provide fallback during SSR
   if (!isMounted) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        backgroundColor: '#f8fafc',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <div>Loading...</div>
-      </div>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
     );
   }
 
@@ -35,9 +29,7 @@ export default function Login() {
     }
 
     if (!email || !password) {
-      if (typeof window !== 'undefined') {
-        window.alert('Please fill in all fields');
-      }
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
@@ -49,141 +41,152 @@ export default function Login() {
       });
 
       if (error) {
-        if (typeof window !== 'undefined') {
-          window.alert('Login Failed: ' + error.message);
-        }
+        Alert.alert('Login Failed', error.message);
       } else {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/(tabs)/dashboard';
-        }
+        router.replace('/(tabs)/dashboard');
       }
     } catch (error) {
-      if (typeof window !== 'undefined') {
-        window.alert('An unexpected error occurred');
-      }
+      Alert.alert('Error', 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
   const navigateToSignup = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/signup';
-    }
+    router.push('/signup');
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc',
-      justifyContent: 'center',
-      padding: '24px'
-    }}>
-      <div style={{
-        maxWidth: '400px',
-        margin: '0 auto',
-        width: '100%'
-      }}>
-        <h1 style={{
-          fontSize: '32px',
-          fontWeight: 'bold',
-          color: '#1E40AF',
-          textAlign: 'center',
-          marginBottom: '8px'
-        }}>Welcome Back</h1>
-        <p style={{
-          fontSize: '16px',
-          color: '#64748b',
-          textAlign: 'center',
-          marginBottom: '32px'
-        }}>Sign in to continue your MCAT journey</p>
+    <View style={styles.container}>
+      <View style={styles.formContainer}>
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Sign in to continue your MCAT journey</Text>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#374151',
-            display: 'block',
-            marginBottom: '8px'
-          }}>Email</label>
-          <input
-            type="email"
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChangeText={setEmail}
             placeholder="Enter your email"
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '16px',
-              backgroundColor: 'white'
-            }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.input}
           />
-        </div>
+        </View>
 
-        <div style={{ marginBottom: '24px' }}>
-          <label style={{
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#374151',
-            display: 'block',
-            marginBottom: '8px'
-          }}>Password</label>
-          <input
-            type="password"
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChangeText={setPassword}
             placeholder="Enter your password"
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '16px',
-              backgroundColor: 'white'
-            }}
+            secureTextEntry
+            style={styles.input}
           />
-        </div>
+        </View>
 
-        <button
-          onClick={handleLogin}
+        <TouchableOpacity
+          onPress={handleLogin}
           disabled={loading}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: loading ? '#9ca3af' : '#1E40AF',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            marginBottom: '16px'
-          }}
+          style={[styles.button, loading && styles.buttonDisabled]}
         >
-          {loading ? 'Signing In...' : 'Sign In'}
-        </button>
+          <Text style={styles.buttonText}>
+            {loading ? 'Signing In...' : 'Sign In'}
+          </Text>
+        </TouchableOpacity>
 
-        <div style={{ textAlign: 'center' }}>
-          <span style={{ color: '#64748b' }}>Don't have an account? </span>
-          <button
-            onClick={navigateToSignup}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#1E40AF',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            Sign Up
-          </button>
-        </div>
-      </div>
-    </div>
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Don't have an account? </Text>
+          <TouchableOpacity onPress={navigateToSignup}>
+            <Text style={styles.signupLink}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#64748b',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  formContainer: {
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1E40AF',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  input: {
+    width: '100%',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    fontSize: 16,
+    backgroundColor: 'white',
+  },
+  button: {
+    width: '100%',
+    padding: 12,
+    backgroundColor: '#1E40AF',
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#9ca3af',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  signupText: {
+    color: '#64748b',
+    fontSize: 14,
+  },
+  signupLink: {
+    color: '#1E40AF',
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
+});

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -39,25 +40,17 @@ export default function Analytics() {
     setIsMounted(true);
   }, []);
 
-  // Provide fallback during SSR
+  // Provide fallback during loading
   if (!isMounted) {
     return (
-      <div style={{
-        display: 'flex',
-        minHeight: '100vh',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8fafc'
-      }}>
-        <div>Loading Analytics...</div>
-      </div>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading Analytics...</Text>
+      </View>
     );
   }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      loadAnalyticsData();
-    }
+    loadAnalyticsData();
   }, [selectedPeriod]);
 
   const loadAnalyticsData = async () => {
@@ -274,193 +267,240 @@ export default function Analytics() {
     : 0;
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc',
-      overflowY: 'auto'
-    }}>
+    <ScrollView style={styles.container}>
       {/* Header */}
-      <div style={{
-        padding: '20px',
-        paddingTop: '60px',
-        backgroundColor: 'white',
-        textAlign: 'center'
-      }}>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: 'bold',
-          color: '#1E293B',
-          marginBottom: '4px',
-          margin: 0
-        }}>Analytics</h1>
-        <p style={{
-          fontSize: '16px',
-          color: '#64748b',
-          margin: 0
-        }}>Track your progress and performance</p>
-      </div>
+      <View style={styles.header}>
+        <Text style={styles.title}>Analytics</Text>
+        <Text style={styles.subtitle}>Track your progress and performance</Text>
+      </View>
 
       {/* Period Selector */}
-      <div style={{
-        display: 'flex',
-        padding: '20px',
-        paddingBottom: '10px'
-      }}>
+      <View style={styles.periodSelector}>
         {(['week', 'month', 'all'] as const).map((period) => (
-          <button
+          <TouchableOpacity
             key={period}
-            style={{
-              flex: 1,
-              padding: '12px',
-              margin: '0 4px',
-              borderRadius: '8px',
-              backgroundColor: selectedPeriod === period ? '#1E40AF' : '#F1F5F9',
-              color: selectedPeriod === period ? 'white' : '#64748b',
-              border: 'none',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
-            onClick={() => setSelectedPeriod(period)}
+            style={[
+              styles.periodButton,
+              selectedPeriod === period && styles.periodButtonActive
+            ]}
+            onPress={() => setSelectedPeriod(period)}
           >
-            {period === 'week' ? 'Week' : period === 'month' ? 'Month' : 'All Time'}
-          </button>
+            <Text style={[
+              styles.periodButtonText,
+              selectedPeriod === period && styles.periodButtonTextActive
+            ]}>
+              {period === 'week' ? 'Week' : period === 'month' ? 'Month' : 'All Time'}
+            </Text>
+          </TouchableOpacity>
         ))}
-      </div>
+      </View>
 
       {/* Summary Stats */}
-      <div style={{
-        display: 'flex',
-        padding: '20px',
-        paddingTop: '10px'
-      }}>
-        <div style={{
-          flex: 1,
-          backgroundColor: 'white',
-          padding: '16px',
-          borderRadius: '12px',
-          textAlign: 'center',
-          margin: '0 4px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: '24px', color: '#1E40AF', marginBottom: '8px' }}>⏰</div>
-          <div style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#1E293B',
-            marginTop: '8px'
-          }}>{Math.round(totalStudyHours * 10) / 10}h</div>
-          <div style={{
-            fontSize: '12px',
-            color: '#64748b',
-            marginTop: '4px'
-          }}>Total Study Time</div>
-        </div>
-        <div style={{
-          flex: 1,
-          backgroundColor: 'white',
-          padding: '16px',
-          borderRadius: '12px',
-          textAlign: 'center',
-          margin: '0 4px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: '24px', color: '#10B981', marginBottom: '8px' }}>📈</div>
-          <div style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#1E293B',
-            marginTop: '8px'
-          }}>{averageExamScore || '--'}</div>
-          <div style={{
-            fontSize: '12px',
-            color: '#64748b',
-            marginTop: '4px'
-          }}>Avg Exam Score</div>
-        </div>
-        <div style={{
-          flex: 1,
-          backgroundColor: 'white',
-          padding: '16px',
-          borderRadius: '12px',
-          textAlign: 'center',
-          margin: '0 4px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: '24px', color: '#8B5CF6', marginBottom: '8px' }}>📄</div>
-          <div style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#1E293B',
-            marginTop: '8px'
-          }}>{examData.length}</div>
-          <div style={{
-            fontSize: '12px',
-            color: '#64748b',
-            marginTop: '4px'
-          }}>Practice Exams</div>
-        </div>
-      </div>
+      <View style={styles.summaryStats}>
+        <View style={styles.statCard}>
+          <Text style={[styles.statIcon, { color: '#1E40AF' }]}>⏰</Text>
+          <Text style={styles.statValue}>{Math.round(totalStudyHours * 10) / 10}h</Text>
+          <Text style={styles.statLabel}>Total Study Time</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={[styles.statIcon, { color: '#10B981' }]}>📈</Text>
+          <Text style={styles.statValue}>{averageExamScore || '--'}</Text>
+          <Text style={styles.statLabel}>Avg Exam Score</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={[styles.statIcon, { color: '#8B5CF6' }]}>📄</Text>
+          <Text style={styles.statValue}>{examData.length}</Text>
+          <Text style={styles.statLabel}>Practice Exams</Text>
+        </View>
+      </View>
 
       {/* Charts Placeholder */}
-      <div style={{
-        backgroundColor: 'white',
-        margin: '20px',
-        marginTop: '10px',
-        borderRadius: '16px',
-        padding: '16px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{
-          fontSize: '18px',
-          fontWeight: '600',
-          color: '#1E293B',
-          marginBottom: '16px',
-          textAlign: 'center',
-          margin: '0 0 16px 0'
-        }}>Analytics Dashboard</h3>
-        <div style={{
-          padding: '40px',
-          textAlign: 'center',
-          color: '#64748b'
-        }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
-          <p style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600' }}>
+      <View style={styles.chartsContainer}>
+        <Text style={styles.chartsTitle}>Analytics Dashboard</Text>
+        <View style={styles.chartsPlaceholder}>
+          <Text style={styles.chartsIcon}>📊</Text>
+          <Text style={styles.chartsMainText}>
             Charts will be available soon
-          </p>
-          <p style={{ margin: 0, fontSize: '14px', lineHeight: '20px' }}>
+          </Text>
+          <Text style={styles.chartsSubText}>
             Interactive charts and detailed analytics are coming in a future update
-          </p>
-        </div>
-      </div>
+          </Text>
+        </View>
+      </View>
 
       {/* Empty State */}
       {studyData.length === 0 && examData.length === 0 && (
-        <div style={{
-          backgroundColor: 'white',
-          margin: '20px',
-          padding: '40px',
-          borderRadius: '16px',
-          textAlign: 'center',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: '64px', color: '#9CA3AF', marginBottom: '16px' }}>📈</div>
-          <div style={{
-            fontSize: '20px',
-            fontWeight: '600',
-            color: '#64748b',
-            marginTop: '16px'
-          }}>No data available</div>
-          <div style={{
-            fontSize: '14px',
-            color: '#9CA3AF',
-            marginTop: '8px',
-            lineHeight: '20px'
-          }}>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateIcon}>📈</Text>
+          <Text style={styles.emptyStateTitle}>No data available</Text>
+          <Text style={styles.emptyStateSubtitle}>
             Start logging study sessions and practice exams to see your analytics
-          </div>
-        </div>
+          </Text>
+        </View>
       )}
-    </div>
-  );
-}
+    </ScrollView>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+   container: {
+     flex: 1,
+     backgroundColor: '#f8fafc',
+   },
+   header: {
+     backgroundColor: 'white',
+     paddingHorizontal: 20,
+     paddingTop: 60,
+     paddingBottom: 20,
+     borderBottomWidth: 1,
+     borderBottomColor: '#e2e8f0',
+   },
+   title: {
+     fontSize: 28,
+     fontWeight: 'bold',
+     color: '#1e293b',
+     textAlign: 'center',
+   },
+   subtitle: {
+     fontSize: 16,
+     color: '#64748b',
+     textAlign: 'center',
+     marginTop: 4,
+   },
+   periodSelector: {
+     flexDirection: 'row',
+     backgroundColor: '#f1f5f9',
+     borderRadius: 12,
+     padding: 4,
+     marginHorizontal: 20,
+     marginTop: 20,
+   },
+   periodButton: {
+     flex: 1,
+     paddingVertical: 12,
+     borderRadius: 8,
+     alignItems: 'center',
+   },
+   periodButtonActive: {
+     backgroundColor: 'white',
+   },
+   periodButtonText: {
+     fontSize: 14,
+     fontWeight: '600',
+     color: '#64748b',
+   },
+   periodButtonTextActive: {
+     color: '#1e40af',
+   },
+   summaryStats: {
+     flexDirection: 'row',
+     padding: 20,
+     paddingTop: 10,
+   },
+   statCard: {
+     flex: 1,
+     backgroundColor: 'white',
+     padding: 16,
+     borderRadius: 12,
+     alignItems: 'center',
+     marginHorizontal: 4,
+     shadowColor: '#000',
+     shadowOffset: {
+       width: 0,
+       height: 2,
+     },
+     shadowOpacity: 0.1,
+     shadowRadius: 4,
+     elevation: 3,
+   },
+   statIcon: {
+     fontSize: 24,
+     marginBottom: 8,
+   },
+   statValue: {
+     fontSize: 20,
+     fontWeight: 'bold',
+     color: '#1E293B',
+     marginTop: 8,
+   },
+   statLabel: {
+     fontSize: 12,
+     color: '#64748b',
+     marginTop: 4,
+   },
+   chartsContainer: {
+     backgroundColor: 'white',
+     margin: 20,
+     marginTop: 10,
+     borderRadius: 16,
+     padding: 16,
+     shadowColor: '#000',
+     shadowOffset: {
+       width: 0,
+       height: 2,
+     },
+     shadowOpacity: 0.1,
+     shadowRadius: 4,
+     elevation: 3,
+   },
+   chartsTitle: {
+     fontSize: 18,
+     fontWeight: '600',
+     color: '#1E293B',
+     marginBottom: 16,
+     textAlign: 'center',
+   },
+   chartsPlaceholder: {
+     padding: 40,
+     alignItems: 'center',
+   },
+   chartsIcon: {
+     fontSize: 48,
+     marginBottom: 16,
+   },
+   chartsMainText: {
+     fontSize: 16,
+     fontWeight: '600',
+     color: '#64748b',
+     marginBottom: 8,
+   },
+   chartsSubText: {
+     fontSize: 14,
+     lineHeight: 20,
+     color: '#64748b',
+     textAlign: 'center',
+   },
+   emptyState: {
+     backgroundColor: 'white',
+     margin: 20,
+     padding: 40,
+     borderRadius: 16,
+     alignItems: 'center',
+     shadowColor: '#000',
+     shadowOffset: {
+       width: 0,
+       height: 2,
+     },
+     shadowOpacity: 0.1,
+     shadowRadius: 4,
+     elevation: 3,
+   },
+   emptyStateIcon: {
+     fontSize: 64,
+     color: '#9CA3AF',
+     marginBottom: 16,
+   },
+   emptyStateTitle: {
+     fontSize: 20,
+     fontWeight: '600',
+     color: '#64748b',
+     marginTop: 16,
+   },
+   emptyStateSubtitle: {
+     fontSize: 14,
+     color: '#9CA3AF',
+     marginTop: 8,
+     lineHeight: 20,
+     textAlign: 'center',
+   },
+ });

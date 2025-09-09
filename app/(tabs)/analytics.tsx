@@ -503,4 +503,14 @@ export default function Analytics() {
      lineHeight: 20,
      textAlign: 'center',
    },
+   loadingContainer: {
+     flex: 1,
+     justifyContent: 'center',
+     alignItems: 'center',
+     backgroundColor: '#f8fafc',
+   },
+   loadingText: {
+     fontSize: 16,
+     color: '#64748b',
+   },
  });
